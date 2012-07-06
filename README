@@ -1,0 +1,30 @@
+TouchPad Camera Tester
+
+----------------
+
+This is very simple application I made to be able to run particular functions
+from the libcamera.so library. 
+
+Instructions
+
+1. You need to have the CM9 sources patched with several patches from
+   gerrit. Use the following script to patch the sources:
+   http://pastebin.com/8igJK9WF
+
+2. Download the camtest sources to the ~/android/system/device/hp/tenderloin
+   directory.  
+
+3. Patch the BoardConfig.mk and device_tenderloin.mk and add camtest to
+   PRODUCT_PACKAGES
+
+4. Obtain the libcamera.so and liboemcamera.so from CM7a2.1 build and replace
+   the ones from CM9 in: ~/android/system/vendor/hp/tenderloin/proprietary/lib
+   The libraries used in CM9 are incorrect and won't load thus there's need to
+   use the proper ones from CM7.
+
+5. Run "make clean" before running the first build.
+
+6. Run "brunch tenderloin" to make a build.
+
+7. To run the camtest app on the device log into it using "adb shell" and
+   execute camtest.
