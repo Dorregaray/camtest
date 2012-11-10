@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define LOG_NIDEBUG 0
-#define LOG_TAG "test"
+#define LOG_NDEBUG 0
+#define LOG_TAG "camtest"
 #include <utils/Log.h>
 
 #include "CameraHardwareInterface.h"
@@ -83,37 +83,45 @@ static void wrap_queue_buffer_hook(void *data, void* buffer)
 	LOGI("%s+++: dat %p, buffer %p", __FUNCTION__,data, buffer);
 }
 
-static void print_menu()
-{
-	printf("a. getPreviewHeap\n");
-	printf("b. getRawHeap\n");
-	printf("c. enableMsgType\n");
-	printf("d. disableMsgType\n");
-	printf("e. msgTypeEnabled\n");
-	printf("f. startPreview\n");
-	printf("g. useOverlay\n");
-	printf("h. setOverlay\n");
-	printf("i. stopPreview\n");
-	printf("j. previewEnabled\n");
-	printf("k. startRecording\n");
-	printf("l. stopRecording()\n");
-	printf("m. recordingEnabled\n");
-	printf("n. releaseRecordingFrame\n");
-	printf("o. autoFocus\n");
-	printf("p. cancelAutoFocus\n");
-	printf("q. takePicture\n");
-	printf("r. cancelPicture\n");
-	printf("s. setParameters\n");
-	printf("t. getParameters\n");
-	printf("u. sendCommand\n");
-	printf("v. release\n");
+static char *menu_items[] = {
+	"getPreviewHeap",
+	"getRawHeap",
+	"enableMsgType",
+	"disableMsgType",
+	"msgTypeEnabled",
+	"startPreview",
+	"useOverlay",
+	"setOverlay",
+	"stopPreview",
+	"previewEnabled",
+	"startRecording",
+	"stopRecording",
+	"recordingEnabled",
+	"releaseRecordingFrame",
+	"autoFocus",
+	"cancelAutoFocus",
+	"takePicture",
+	"cancelPicture",
+	"setParameters",
+	"getParameters",
+	"sendCommand",
+	"release",
 #ifdef USE_GETBUFFERINFO
-	printf("x. getBufferInfo\n");
+	"getBufferInfo",
 #endif
 #ifdef USE_ENCODEDATA
-	printf("y. encodeData\n");
+	"encodeData",
 #endif
-	printf("z. exit\n");
+	"exit"
+};
+
+static void print_menu()
+{
+	int i;
+	for (i = 0; i < sizeof(menu_items)/sizeof(menu_items[0]); ++i)
+	{
+		printf("%c. %s\n", i + 97, menu_items[i]);
+	}
 }
 
 int main(int argc, char **argv)
@@ -127,6 +135,7 @@ int main(int argc, char **argv)
 	int ret;
 
 	printf("Camera Tester\n");
+	LOGI("Camera Tester started");
 
 	android::Overlay *overlay =  new android::Overlay(wrap_set_fd_hook,
 		wrap_set_crop_hook,
@@ -135,12 +144,14 @@ int main(int argc, char **argv)
 
 	printf("Opening camera...\n");
 	camera = openCameraHardware();
-	if(camera == NULL)
+	if (camera == NULL)
 	{
 		printf("Cannot open Camera\n");
 		return -1;
 	}
-  
+
+	LOGI("Camera opened");
+
 	char option = 0;
 	do
 	{
@@ -149,9 +160,13 @@ int main(int argc, char **argv)
 		option = getchar();
 		printf("\n");
 
-		if (option != 'z') printf("*** Executing...\n");
-		ret = 1024;
 		clock_gettime(CLOCK_MONOTONIC, &tp);
+		if (option >= 'a' && option <= 'y')
+		{
+			printf("*** Executing %s...\n", menu_items[option-97]);
+			LOGI("\n-------------------------------------\n%s:\n", menu_items[option-97]);
+		}
+		ret = 1024;
 		switch (option)
 		{
 			case 'a':
@@ -222,28 +237,29 @@ int main(int argc, char **argv)
 				camera->release();
 				break;
 #ifdef USE_GETBUFFERINFO
-			case 'x':
+			case 'w':
 				ret = camera->getBufferInfo(mem, &alignedSize);
 				break;
 #endif
 #ifdef USE_ENCODEDATA
-			case 'y':
+			case 'x':
 				camera->encodeData();
 				break;
 #endif
-			case 'z':
-				break;
 		}
-		if (ret != 1024) 
-			printf("*** Function returned: %d\n", ret); 
-		else 
-			printf("*** Function does not return value\n");
+		if (option >= 'a' && option < 'y' && ret != 1024)
+		{
+			printf("*** Function %s returned: %d\n", menu_items[option-97], ret);
+			LOGI("Result: %d", ret);
+		}
 		printf("*** Command executed at: [%5lu.%06lu]\n\n", tp.tv_sec, tp.tv_nsec);
 	}
-	while (option != 'z');
+	while (option < 'y');
+
+	LOGI("Closing camera");
+	camera->release();
+	camera.clear();
 
 	printf("Exiting\n");
-	camera->release();
-
 	return 0;
 }
