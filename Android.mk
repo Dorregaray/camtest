@@ -11,6 +11,9 @@ endif
 ifeq ($(BOARD_CAMERA_USE_GETBUFFERINFO),true)
     LOCAL_CFLAGS += -DUSE_GETBUFFERINFO
 endif
+ifeq ($(BOARD_USE_FROYO_LIBCAMERA), true)
+    LOCAL_CFLAGS += -DBOARD_USE_FROYO_LIBCAMERA
+endif
 
 LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_client liblog libcutils libcamera
 

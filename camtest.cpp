@@ -63,7 +63,11 @@ extern "C" {
 #include <stdlib.h>
 }
 
+#ifdef BOARD_USE_FROYO_LIBCAMERA
 extern "C" android::sp<android::CameraHardwareInterface> openCameraHardware();
+#else
+using android::HAL_openCameraHardware;
+#endif
 
 static void wrap_set_fd_hook(void *data, int fd)
 {
@@ -143,7 +147,11 @@ int main(int argc, char **argv)
 		NULL);
 
 	printf("Opening camera...\n");
+#ifdef BOARD_USE_FROYO_LIBCAMERA
 	camera = openCameraHardware();
+#else
+	camera = HAL_openCameraHardware();
+#endif
 	if (camera == NULL)
 	{
 		printf("Cannot open Camera\n");
