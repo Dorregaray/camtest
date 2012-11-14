@@ -131,7 +131,25 @@ static void print_menu()
 
 void sigfpe_handle(int s)
 {
-    LOGV("Received SIGFPE. Ignoring\n");
+	LOGV("Received SIGFPE. Ignoring\n");
+}
+
+static void wrap_notify_callback(int32_t msg_type, int32_t ext1,
+                                 int32_t ext2, void* user)
+{
+	LOGV("Camera notify callback\n");
+}
+
+static void wrap_data_callback(int32_t msg_type, const android::sp<android::IMemory>& dataPtr,
+                               void* user)
+{
+	LOGV("Camera data callback\n");
+}
+
+static void wrap_data_callback_timestamp(nsecs_t timestamp, int32_t msg_type,
+                                         const android::sp<android::IMemory>& dataPtr, void* user)
+{
+	LOGV("Camera data timestamp callback\n");
 }
 
 int main(int argc, char **argv)
@@ -168,6 +186,9 @@ int main(int argc, char **argv)
 	}
 
 	LOGI("Camera opened");
+	
+	camera->setCallbacks(wrap_notify_callback, wrap_data_callback,
+		wrap_data_callback_timestamp, NULL);
 
 	char option = 0;
 	do
