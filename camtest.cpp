@@ -38,6 +38,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <utils/threads.h>
 #include <stdint.h>
+#include <signal.h>
 #include <ui/OverlayHtc.h>
 
 #include "linux/msm_mdp.h"
@@ -128,6 +129,11 @@ static void print_menu()
 	}
 }
 
+void sigfpe_handle(int s)
+{
+    LOGV("Received SIGFPE. Ignoring\n");
+}
+
 int main(int argc, char **argv)
 {
 	android::sp<android::CameraHardwareInterface> camera;
@@ -137,6 +143,9 @@ int main(int argc, char **argv)
 	size_t alignedSize = 0;
 	struct timespec tp;
 	int ret;
+
+	/* add SIGFPE handler */
+	signal(SIGFPE, sigfpe_handle);
 
 	printf("Camera Tester\n");
 	LOGI("Camera Tester started");
